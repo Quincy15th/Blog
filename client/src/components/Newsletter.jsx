@@ -2,9 +2,11 @@ import React from "react";
 
 const Newsletter = () => {
   return (
-    <div>
-      <h1>Never: Miss a blog!</h1>
-      <p className="flex items-center justify-between max-w-2xl w-full md:h-13 h-12">
+    <div className="flex flex-col items-center justify-center text-center space-y-2 my-32">
+      <h1 className="md:text-4xl text-2xl font-semibold">
+        Never: Miss a blog!
+      </h1>
+      <p className="md:text-lg text-gray-500/70 pb-8">
         Subcribe to get the latest blog, new tech, and exclusive new.
       </p>
       <form className="flex items-center justify-between max-w-2xl w-full md:h-13 h-12">
