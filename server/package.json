@@ -2,9 +2,9 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "",
+  "type": "module",
   "scripts": {
-    "server": "node server.js",
+    "server": "nodemon server.js",
     "start": "node server.js"
   },
   "keywords": [],
