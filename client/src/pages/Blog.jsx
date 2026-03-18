@@ -22,7 +22,7 @@ const Blog = () => {
   };
 
   const addComment = (e) => {
-    e.prevenDefault();
+    e.preventDefault();
   };
 
   useEffect(() => {
