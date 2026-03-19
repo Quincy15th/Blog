@@ -16,7 +16,7 @@ export const addBlog = async (req, res) => {
     const response = await imagekit.upload({
       file: fileBuffer,
       fileName: imageFile.originalname,
-      folders: "/blog",
+      folder: "/blog",
     });
     // optimization through imagekit URL tranformation
     const optimizedImageUrl = imagekit.url({
