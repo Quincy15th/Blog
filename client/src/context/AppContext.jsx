@@ -1,12 +1,10 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const AppContext = createContext();
-
 export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const [token, setToken] = useState(null);
@@ -31,14 +29,15 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
   const value = {
-    axios,
     token,
-    navigate,
     setToken,
     blogs,
     setBlogs,
     input,
     setInput,
+    navigate,
+    axios,
+    fetchBlogs,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
