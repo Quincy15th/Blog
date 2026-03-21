@@ -30,7 +30,7 @@ const BlogTableItem = ({ blog, fetchBlogs, index }) => {
   };
   const togglePublish = async () => {
     try {
-      const { data } = await axios.put("/api/blog/toggle-publish", {
+      const { data } = await axios.post("/api/blog/toggle-publish", {
         id: blog._id,
       });
       if (data.success) {

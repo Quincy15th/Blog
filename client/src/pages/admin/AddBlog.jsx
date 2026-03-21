@@ -3,42 +3,71 @@ import { assets, blogCategories } from "../../assets/assets";
 import Quill from "quill";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
+import { parse } from "marked";
 
 const AddBlog = () => {
-  const { axios } = useAppContext();
+  const { axios, fetchBlogs } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(false);
   const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
+  const [subTitle, setSubTitle] = useState("");
   const [category, setCategory] = useState("Startup");
   const [isPublished, setIsPublished] = useState(false);
 
-  const generateContent = async () => {};
+  const generateContent = async () => {
+    if (!title) return toast.error("Please enter a title first");
+    try {
+      setLoading(true);
+      const { data } = await axios.post("/api/blog/generate", {
+        prompt: title,
+      });
+      if (data.success) {
+        quillRef.current.root.innerHTML = parse(data.content);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
       setIsAdding(true);
+
       const blog = {
         title,
-        subtitle,
+        subTitle,
         description: quillRef.current.root.innerHTML,
         category,
         isPublished,
       };
+
       const formData = new FormData();
       formData.append("blog", JSON.stringify(blog));
       formData.append("image", image);
+
       const { data } = await axios.post("/api/blog/add", formData);
       if (data.success) {
         toast.success(data.message);
         setImage(false);
         setTitle("");
+        setSubTitle("");
         quillRef.current.root.innerHTML = "";
         setCategory("Startup");
+        setIsPublished(false);
+        // Refresh the blogs list in context so homepage shows new data
+        fetchBlogs();
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
@@ -52,6 +81,7 @@ const AddBlog = () => {
       quillRef.current = new Quill(editorRef.current, { theme: "snow" });
     }
   }, []);
+
   return (
     <form
       onSubmit={onSubmitHandler}
@@ -73,52 +103,64 @@ const AddBlog = () => {
             required
           />
         </label>
+
         <p className="mt-4">Blog title</p>
         <input
-          className="w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded"
-          required
-          placeholder="Type here"
-          onChange={(e) => setTitle(e.target.value)}
           type="text"
+          placeholder="Type here"
+          required
+          className="w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded"
+          onChange={(e) => setTitle(e.target.value)}
           value={title}
         />
-        <p className="mt-4">Sub title</p>
+
+        <p className="mt-4">Subtitle</p>
         <input
-          className="w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded"
-          required
-          placeholder="Type here"
-          onChange={(e) => setSubtitle(e.target.value)}
           type="text"
-          value={subtitle}
+          placeholder="Type here"
+          required
+          className="w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded"
+          onChange={(e) => setSubTitle(e.target.value)}
+          value={subTitle}
         />
-        <p className="mt-4">Blog description</p>
+
+        <p className="mt-4">Blog Description</p>
         <div className="max-w-lg h-74 pb-16 sm:pb-10 pt-2 relative">
           <div ref={editorRef}></div>
+          {loading && (
+            <div className="absolute right-0 top-0 bottom-0 left-0 flex items-center justify-center bg-black/10 mt-2">
+              <div className="w-8 h-8 rounded-full border-2 border-t-white animate-spin"></div>
+            </div>
+          )}
           <button
-            className="absolute bottom-1 right-2 text-xs ml-2 text-white bg-black/60 px-4 py-1.5 rounded hover:underline cursor-pointer"
+            disabled={loading}
             type="button"
             onClick={generateContent}
+            className="absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer"
           >
             Generate with AI
           </button>
         </div>
+
         <p className="mt-4">Blog category</p>
         <select
           onChange={(e) => setCategory(e.target.value)}
           name="category"
-          className="mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded"
+          className="mt-2 px-3 py-2 border text-gray-500 border-gray-300 rounded outline-none"
         >
           <option value="">Select category</option>
           {blogCategories.map((item, index) => {
             return (
               <option key={index} value={item}>
-                {item}
+                {" "}
+                {item}{" "}
               </option>
             );
           })}
         </select>
-        <div>
-          <p>Publish now</p>
+
+        <div className="flex gap-2 mt-4">
+          <p>Publish Now</p>
           <input
             type="checkbox"
             checked={isPublished}
@@ -126,6 +168,7 @@ const AddBlog = () => {
             onChange={(e) => setIsPublished(e.target.checked)}
           />
         </div>
+
         <button
           disabled={isAdding}
           type="submit"
