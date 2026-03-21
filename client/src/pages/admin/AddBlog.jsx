@@ -27,7 +27,7 @@ const AddBlog = () => {
         prompt: title,
       });
       if (data.success) {
-        quillRef.current.root.innerHTML = parse(data.content);
+        quillRef.current.root.innerHTML = parse(data.content || "");
       } else {
         toast.error(data.message);
       }
